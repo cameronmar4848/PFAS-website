@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Cancer Analysis{% endblock %}
+
+{% block content %}
+    <h1 style="color:#2a2a2a;">Cancer Analysis Based on PFAS Levels</h1>
+
+    <section style="margin-top: 1.5em;">
+        <p style="font-size: 1.1em;">This section explores the relationship between PFAS levels in London-area water sites and bladder cancer incidence. Sites with higher PFAS concentrations may indicate elevated risk.</p>
+
+        <div style="margin-top: 1em; padding: 1em; background-color: #f9f9f9; border-left: 4px solid #0077cc;">
+            <p>📍 <strong>Average PFAS at selected sites:</strong> {{ avg_pfas }}</p>
+            <p>🧬 <strong>Total London bladder cancer cases:</strong> {{ cancer_count }}</p>
+        </div>
+    </section>
+
+    <section style="margin-top: 2em;">
+        <h2 style="margin-bottom: 1em;">📊 PFAS Levels vs. Cancer Cases</h2>
+        <img src="{{ url_for('static', filename='cancer_plot.png') }}" alt="Cancer vs PFAS plot" style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 5px; background: #fff;" />
+    </section>
+{% endblock %}

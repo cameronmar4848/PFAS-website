@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Cancer Analysis{% endblock %}
+
+{% block content %}
+    <h1>Cancer Analysis Based on PFAS Levels</h1>
+
+    <h2>Average PFAS at selected regions: {{ avg_pfas }}</h2>
+    <h2>Total bladder cancer cases across UK regions: {{ cancer_count }}</h2>
+
+    {% if graphs.pfas_comparison %}
+        <h3>PFAS Levels at London Sites</h3>
+        <img src="data:image/png;base64,{{ graphs.pfas_comparison }}" style="width: 100%; max-width: 800px;">
+    {% endif %}
+
+    {% if graphs.cancer_over_time %}
+        <h3>Bladder Cancer Incidence Over Time</h3>
+        <img src="data:image/png;base64,{{ graphs.cancer_over_time }}" style="width: 100%; max-width: 800px;">
+    {% endif %}
+
+    {% if correlation is not none %}
+        <h3>Correlation Between Regional PFAS and Bladder Cancer Incidence</h3>
+        <p>This graph shows how average PFAS levels in water relate to bladder cancer rates across UK regions.</p>
+        <p><strong>r = {{ correlation }}</strong>, <strong>p = {{ pval }}</strong></p>
+        <img src="data:image/png;base64,{{ graphs.correlation_plot }}" style="width: 100%; max-width: 800px;">
+        <p>The graph above depicts that London has the lowest PFAS level and the lowest bladder cancer cases, while the Midlands has the highest mean PFAS level and the highest number of bladder cases.
+            The correlation coefficient: r=0.63, depicts that there is a moderate positive correlation between mean PFAS levels and bladder cancer cases. Therefore as bladder cancer cases go up mean PFAS levels go up.
+            However, correlation does not mean that PFAS are the cause of these bladder cancer cases.
+            The p-value, p=0.3701, is not statistically significant as it is greater than 0.05, meaning that the correlation could be due to random chance. </p>
+    {% endif %}
+
+
+
+{% endblock %}

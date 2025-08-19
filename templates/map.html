@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}PFAS Map{% endblock %}
+
+{% block content %}
+<h1>PFAS in Water</h1>
+
+
+<!-- 🔍 Search Bar -->
+<form method="POST" style="margin-bottom: 20px;">
+    <input type="text" name="search" placeholder="Enter city or site name">
+    <button type="submit">Search</button>
+</form>
+
+<!-- 🧪 Search Result -->
+{% if search_result %}
+    {% if search_result.error %}
+        <p style="color: red;">{{ search_result.error }}</p>
+    {% else %}
+        <p><strong>Area:</strong> {{ search_result.area }}<br>
+           <strong>Avg PFAS:</strong> {{ search_result.avg }}<br>
+           <strong>Status:</strong> {{ search_result.status }}</p>
+    {% endif %}
+{% endif %}
+
+<div id="map" style="height: 600px;"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    const map = L.map('map').setView([52.5, -1.5], 6); // Center over UK
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add PFAS site markers
+    const siteData = {{ map_data | tojson }};
+    siteData.forEach(site => {
+        const color = site.color || "gray";  // Use ML-predicted color
+        L.circleMarker([site.lat, site.lon], {
+            radius: 6,
+            color: color,
+            fillOpacity: 0.7
+        })
+        .bindPopup(`<b>${site.name}</b><br>PFAS: ${site.pfas_sum}`)
+        .addTo(map);
+});
+
+
+    // Add regional polygons in a separate pane (optional for z-index)
+    map.createPane('regions');
+    map.getPane('regions').style.zIndex = 250;
+
+    fetch("{{ geojson_url }}")
+        .then(res => res.json())
+        .then(data => {
+            const regionPFAS = {{ region_pfas | tojson }};
+            L.geoJSON(data, {
+                pane: 'regions',
+                style: feature => ({
+                    fillColor: getColor(regionPFAS[feature.properties.name]),
+                    fillOpacity: 0.3,
+                    color: "#000",
+                    weight: 1
+                }),
+                onEachFeature: function (feature, layer) {
+                    const region = feature.properties.name;
+                    const avg = regionPFAS[region.toLowerCase()] || "N/A";
+                    layer.bindPopup(`<strong>${region}</strong><br>Avg PFAS: ${avg}`);
+                }
+            }).addTo(map);
+        });
+
+    // Color scale
+    function getColor(value) {
+        return value > 20 ? "#800026" :
+               value > 15 ? "#BD0026" :
+               value > 10 ? "#E31A1C" :
+               value > 5  ? "#FC4E2A" :
+               value > 1  ? "#FD8D3C" :
+                            "#FFEDA0";
+    }
+</script>
+{% endblock %}

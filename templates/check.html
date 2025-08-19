@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Check Your Area{% endblock %}
+
+{% block content %}
+<h1>PFAS Risk Checker</h1>
+<p>Enter a PFAS level (in ng/L) from your water test to check potential health risk:</p>
+
+<form method="POST">
+    <label for="pfas_value">PFAS Level (ng/L):</label>
+    <input type="text" name="pfas_value" required>
+    <button type="submit">Check</button>
+</form>
+
+{% if result %}
+    {% if result.error %}
+        <p style="color: red;">{{ result.error }}</p>
+    {% else %}
+        <h2>PFAS Level: {{ result.value }} ng/L</h2>
+        <h3>{{ result.status }}</h3>
+        <p>{{ result.comment }}</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

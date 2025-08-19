@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Education: Protecting Against PFAS{% endblock %}
+
+{% block content %}
+<h1> How to Protect Yourself from PFAS Exposure</h1>
+
+<h2>What are PFAS?</h2>
+<p>Poly- and perfluoroalkyl substances, more commonly known as PFAS, are a large group of synthetic organofluorine chemicals created as surfactants and stain repellents that have been widely used 
+  since the 1940s (Environment Agency 2021). They are present in air, water, sediments, and wildlife, including birds and marine mammals (Pereira, et al, 2021). PFAS are detectable in the blood of 
+  most people and have a half-life duration in humans ranges from 5-8 years (Chen, et. al 2024).  PFAS are linked to adverse health effects such as cancers of the prostate, thyroid, breast, bladder, 
+  ovary, and liver (Winquist 2023). Non-polymer PFAS such as PFOA, PFOS, and PFHXS have been produced for the longest amount of time, but are now banned chemicals in many countries, including the UK, 
+  and due to their wide distribution within the environment, are the PFAS most predominantly and commonly found within the human body  </p>
+
+<h2>PFAS in Drinking Water: </h2> 
+<p>Since 2003, PFAS have been the subject of many drinking water quality monitoring surveys to track and remove PFAS from drinking water since they have been found in both tap and bottled water (Teymoorian, Munoz, Sauve 2025).
+  Currently, the UK allows 10 ng/L for each singular PFAS to be present in drinking water with no current limit on the collective amount of PFAS present in the drinking water. The EU has a limit of 100 ng/L for a collective amount 
+  of 20 specific PFAS in drinking water and the US has a 4 ng/L limit for PFOS and PFOA (Royal Society of Chemistry). Therefore, the UK is not extracting as many PFAS out of drinking water as others are around the world
+</p>
+
+<h2> Tips You Can Use:</h2>
+<ul>
+    <li> <strong>Use a certified water filter:</strong> Look for filters certified to remove PFAS, such as NSF P473-certified filters. Pitcher and under-sink filters are widely available.</li>
+    <li> <strong>Avoid nonstick cookware:</strong> Especially older pans with PTFE or Teflon coatings. Use stainless steel, cast iron, or ceramic instead.</li>
+    <li> <strong>Limit fast food and takeout:</strong> Packaging often contains PFAS. Eat more home-cooked meals when possible.</li>
+    <li> <strong>Be cautious with stain-resistant or water-repellent fabrics:</strong> These often contain PFAS. Check labels before buying.</li>
+    <li> <strong>Choose PFAS-free personal care products:</strong> Especially cosmetics labeled with “fluoro” or “PTFE.”</li>
+</ul>
+
+<h2>📚 Learn More:</h2>
+<ul>
+    <li><a href="https://www.ewg.org/pfaschemicals/" target="_blank">Environmental Working Group (EWG) PFAS Guide</a></li>
+    <li><a href="https://www.epa.gov/pfas/basic-information-pfas" target="_blank">US EPA: Basic Info on PFAS</a></li>
+    <li><a href="https://www.pfasfree.org.uk/" target="_blank">PFAS in the UK</a></li>
+</ul>
+
+<h2> Your Local Context:</h2>
+<p>Please check your local water source PFAS levels using the map and search tools provided in this app. High PFAS levels may warrant the use of a filter or contacting your local council.</p>
+
+
+<h2>Regional Information:</h2>
+<p>PFAS contamination is a public health concern. If you're in one of the following regions, be especially aware due to higher PFAS levels in water sources:</p>
+
+<ul>
+  {% for region in region_data %}
+    <li>
+      <strong>{{ region["Region"] }}</strong>: Average PFAS = <strong>{{ "%.2f"|format(region["Mean_PFAS"]) }}</strong>
+    </li>
+  {% endfor %}
+</ul>
+
+
+{% endblock %}

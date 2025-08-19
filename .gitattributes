@@ -1,0 +1,2 @@
+data/cancer_stats.xlsx filter=lfs diff=lfs merge=lfs -text
+static/UK_map.geojson filter=lfs diff=lfs merge=lfs -text
