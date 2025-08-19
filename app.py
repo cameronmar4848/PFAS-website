@@ -22,6 +22,16 @@ expected_features = joblib.load("model/feature_names.pkl")
 
 app = Flask(__name__)
 
+@app.route("/_health")
+def _health():
+    return "OK", 200
+
+# TEMP: prove the app/route wiring works
+@app.route("/_test")
+def _test():
+    return "Hello from Render!", 200
+
+
 @app.route("/", methods=["GET", "POST"])
 def map_view():
     filepath = os.path.join("data", "UK water quality data.xlsx")
