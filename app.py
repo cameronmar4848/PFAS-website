@@ -16,88 +16,88 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 import joblib
 
-# Load model and feature names
-clf = joblib.load("model/risk_classifier.pkl")
-expected_features = joblib.load("model/feature_names.pkl")
 
 app = Flask(__name__)
-
-@app.route("/_health")
-def _health():
-    return "OK", 200
-
-# TEMP: prove the app/route wiring works
-@app.route("/_test")
-def _test():
-    return "Hello from Render!", 200
 
 
 @app.route("/", methods=["GET", "POST"])
 def map_view():
-    filepath = os.path.join("data", "UK water quality data.xlsx")
-    df = load_and_clean_water_data(filepath)  
+   filepath = os.path.join("data", "UK water quality data.xlsx")
+   df = load_and_clean_water_data(filepath) 
 
-    if not {"lat", "lon", "pfas_sum", "name"}.issubset(df.columns):
-        return "❌ Missing required columns in water data."
 
-    # 🔹 Load ML model + feature columns
-    try:
-        import joblib
-        clf = joblib.load("model/risk_classifier.pkl")
-        expected_features = joblib.load("model/feature_names.pkl")
+   if not {"lat", "lon", "pfas_sum", "name"}.issubset(df.columns):
+       return "❌ Missing required columns in water data."
 
-        # Prepare features and one-hot encode
-        features = df[["pfas_sum", "matrix", "source_type"]].copy()
-        features = pd.get_dummies(features)
 
-        # Align columns with training features
-        features = features.reindex(columns=expected_features, fill_value=0)
+   # 🔹 Load ML model + feature columns
+   try:
+       import joblib
+       clf = joblib.load("model/risk_classifier.pkl")
+       expected_features = joblib.load("model/feature_names.pkl")
 
-        # Predict risk class (0 = green, 1 = red)
-        df["risk_class"] = clf.predict(features)
-        df["color"] = df["risk_class"].map({0: "green", 1: "red"})
-    except Exception as e:
-        print(f"⚠️ ML model failed: {e}")
-        df["color"] = "gray"
 
-    # Convert to JSON-compatible dict
-    data_for_map = df[["name", "lat", "lon", "pfas_sum", "color"]].to_dict(orient="records")
+       # Prepare features and one-hot encode
+       features = df[["pfas_sum", "matrix", "source_type"]].copy()
+       features = pd.get_dummies(features)
 
-    # Load region data
-    region_dict = {}
-    try:
-        region_df = pd.read_csv("cleaned_data/grouped_region_avg_pfas.csv")
-        if "Region" in region_df.columns and "Mean_PFAS" in region_df.columns:
-            region_df["Region"] = region_df["Region"].str.strip().str.lower()
-            region_dict = region_df.set_index("Region")["Mean_PFAS"].to_dict()
-    except Exception as e:
-        print(f"⚠️ Could not load region PFAS data: {e}")
 
-    # 🔍 Handle search query
-    search_result = None
-    if request.method == "POST":
-        query = request.form.get("search", "").strip().lower()
-        df["name_lower"] = df["name"].str.lower()
-        match = df[df["name_lower"].str.contains(query)]
+       # Align columns with training features
+       features = features.reindex(columns=expected_features, fill_value=0)
 
-        if not match.empty:
-            avg = round(match["pfas_sum"].mean(), 2)
-            status = "High" if avg > 10 else "Low"
-            search_result = {
-                "area": match.iloc[0]["name"],
-                "avg": avg,
-                "status": status
-            }
-        else:
-            search_result = {"error": "❌ No matching area found."}
 
-    return render_template(
-        "map.html",
-        map_data=data_for_map,
-        geojson_url=url_for("static", filename="UK_map.geojson"),
-        region_pfas=region_dict,
-        search_result=search_result
-    )
+       # Predict risk class (0 = green, 1 = red)
+       df["risk_class"] = clf.predict(features)
+       df["color"] = df["risk_class"].map({0: "green", 1: "red"})
+   except Exception as e:
+       print(f"⚠️ ML model failed: {e}")
+       df["color"] = "gray"
+
+
+   # Convert to JSON-compatible dict
+   data_for_map = df[["name", "lat", "lon", "pfas_sum", "color"]].to_dict(orient="records")
+
+
+   # Load region data
+   region_dict = {}
+   try:
+       region_df = pd.read_csv("cleaned_data/grouped_region_avg_pfas.csv")
+       if "Region" in region_df.columns and "Mean_PFAS" in region_df.columns:
+           region_df["Region"] = region_df["Region"].str.strip().str.lower()
+           region_dict = region_df.set_index("Region")["Mean_PFAS"].to_dict()
+   except Exception as e:
+       print(f"⚠️ Could not load region PFAS data: {e}")
+
+
+   # 🔍 Handle search query
+   search_result = None
+   if request.method == "POST":
+       query = request.form.get("search", "").strip().lower()
+       df["name_lower"] = df["name"].str.lower()
+       match = df[df["name_lower"].str.contains(query)]
+
+
+       if not match.empty:
+           avg = round(match["pfas_sum"].mean(), 2)
+           status = "High" if avg > 10 else "Low"
+           search_result = {
+               "area": match.iloc[0]["name"],
+               "avg": avg,
+               "status": status
+           }
+       else:
+           search_result = {"error": "❌ No matching area found."}
+
+
+   return render_template(
+       "map.html",
+       map_data=data_for_map,
+       geojson_url=url_for("static", filename="UK_map.geojson"),
+       region_pfas=region_dict,
+       search_result=search_result
+   )
+
+
 
 
 @app.route("/cancer-analysis")
